@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using FlashMark.Views;
 
 namespace FlashMark;
 
@@ -15,8 +16,7 @@ public partial class App : Application
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            // TODO: 后续替换为 OverlayWindow
-            desktop.MainWindow = new Avalonia.Controls.Window { Title = "FlashMark" };
+            desktop.MainWindow = new OverlayWindow();
         }
 
         base.OnFrameworkInitializationCompleted();
