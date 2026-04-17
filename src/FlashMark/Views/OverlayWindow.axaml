@@ -9,5 +9,9 @@
         Topmost="True"
         WindowState="Maximized"
         ShowInTaskbar="False">
-    <controls:DrawCanvas x:Name="Canvas" />
+    <Panel>
+        <controls:DrawCanvas x:Name="Canvas" />
+        <controls:BorderGlow x:Name="BorderGlow" />
+        <controls:StatusBar x:Name="StatusBar" />
+    </Panel>
 </Window>

@@ -9,6 +9,7 @@ using Avalonia.Media;
 using FlashMark.Models;
 using FlashMark.Services;
 using FlashMark.Tools;
+using FlashMark.Views;
 
 public class DrawCanvas : Control
 {
@@ -64,6 +65,7 @@ public class DrawCanvas : Control
     protected override void OnPointerPressed(PointerPressedEventArgs e)
     {
         base.OnPointerPressed(e);
+        if (!State.IsActive) return;
         var point = e.GetCurrentPoint(this);
 
         if (point.Properties.IsRightButtonPressed)
@@ -137,6 +139,17 @@ public class DrawCanvas : Control
     protected override void OnKeyDown(KeyEventArgs e)
     {
         base.OnKeyDown(e);
+
+        if (e.Key == Key.Escape)
+        {
+            // Deactivate via the parent OverlayWindow
+            if (this.VisualRoot is Views.OverlayWindow overlay)
+                overlay.SetActive(false);
+            e.Handled = true;
+            return;
+        }
+
+        if (!State.IsActive) return;
 
         if (e.Key == Key.Z && e.KeyModifiers.HasFlag(KeyModifiers.Control) && e.KeyModifiers.HasFlag(KeyModifiers.Shift))
         {
