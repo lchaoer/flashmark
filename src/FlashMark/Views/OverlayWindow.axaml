@@ -1,5 +1,6 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="using:FlashMark.Controls"
         x:Class="FlashMark.Views.OverlayWindow"
         Title="FlashMark"
         WindowDecorations="None"
@@ -8,4 +9,5 @@
         Topmost="True"
         WindowState="Maximized"
         ShowInTaskbar="False">
+    <controls:DrawCanvas x:Name="Canvas" />
 </Window>
