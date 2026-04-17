@@ -45,6 +45,14 @@ public class AppState : INotifyPropertyChanged
     }
 
     public List<Stroke> Strokes { get; } = new();
+
+    public void Undo()
+    {
+        if (Strokes.Count > 0)
+            Strokes.RemoveAt(Strokes.Count - 1);
+    }
+
+    public void ClearAll() => Strokes.Clear();
     public FadeConfig FadeConfig { get; set; } = new();
 
     public event PropertyChangedEventHandler? PropertyChanged;

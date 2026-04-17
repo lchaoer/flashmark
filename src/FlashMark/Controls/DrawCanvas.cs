@@ -1,5 +1,6 @@
 namespace FlashMark.Controls;
 
+using System;
 using System.Collections.Generic;
 using Avalonia;
 using Avalonia.Controls;
@@ -27,6 +28,8 @@ public class DrawCanvas : Control
         var penTool = new PenTool();
         var arrowTool = new ArrowTool();
         var shapeTool = new ShapeTool();
+        var eraserTool = new EraserTool();
+        eraserTool.SetState(State);
 
         _tools = new Dictionary<ToolType, ITool>
         {
@@ -35,6 +38,7 @@ public class DrawCanvas : Control
             [ToolType.Line] = arrowTool,
             [ToolType.Rect] = shapeTool,
             [ToolType.Ellipse] = shapeTool,
+            [ToolType.Eraser] = eraserTool,
         };
     }
 
@@ -64,7 +68,9 @@ public class DrawCanvas : Control
             FadeMode = State.FadeMode,
         };
         _tools[_currentStroke.Tool].OnPointerPressed(point.Position, _currentStroke);
-        State.Strokes.Add(_currentStroke);
+        if (State.CurrentTool != ToolType.Eraser)
+            State.Strokes.Add(_currentStroke);
+        InvalidateVisual();
         e.Handled = true;
     }
 
@@ -84,8 +90,61 @@ public class DrawCanvas : Control
         if (_currentStroke == null) return;
 
         _tools[_currentStroke.Tool].OnPointerReleased(e.GetCurrentPoint(this).Position, _currentStroke);
-        _currentStroke.IsComplete = true;
+        if (_currentStroke.Tool != ToolType.Eraser)
+            _currentStroke.IsComplete = true;
         _currentStroke = null;
+        e.Handled = true;
+    }
+
+    protected override void OnKeyDown(KeyEventArgs e)
+    {
+        base.OnKeyDown(e);
+
+        if (e.Key == Key.Z && e.KeyModifiers.HasFlag(KeyModifiers.Control) && e.KeyModifiers.HasFlag(KeyModifiers.Shift))
+        {
+            State.ClearAll();
+            InvalidateVisual();
+            e.Handled = true;
+            return;
+        }
+
+        if (e.Key == Key.Z && e.KeyModifiers.HasFlag(KeyModifiers.Control))
+        {
+            State.Undo();
+            InvalidateVisual();
+            e.Handled = true;
+            return;
+        }
+
+        switch (e.Key)
+        {
+            case Key.D1: State.CurrentTool = ToolType.Pen; e.Handled = true; break;
+            case Key.D2: State.CurrentTool = ToolType.Arrow; e.Handled = true; break;
+            case Key.D3: State.CurrentTool = ToolType.Rect; e.Handled = true; break;
+            case Key.D4: State.CurrentTool = ToolType.Ellipse; e.Handled = true; break;
+            case Key.D5: State.CurrentTool = ToolType.Eraser; e.Handled = true; break;
+        }
+
+        var colors = new Dictionary<Key, Color>
+        {
+            [Key.Q] = Color.Parse("#FF4444"),
+            [Key.W] = Color.Parse("#4488FF"),
+            [Key.E] = Color.Parse("#44BB44"),
+            [Key.R] = Color.Parse("#FFBB33"),
+            [Key.T] = Colors.White,
+        };
+        if (colors.TryGetValue(e.Key, out var color))
+        {
+            State.CurrentColor = color;
+            e.Handled = true;
+        }
+    }
+
+    protected override void OnPointerWheelChanged(PointerWheelEventArgs e)
+    {
+        base.OnPointerWheelChanged(e);
+        var delta = e.Delta.Y > 0 ? 1.0 : -1.0;
+        State.CurrentWidth = Math.Clamp(State.CurrentWidth + delta, 1.0, 20.0);
         e.Handled = true;
     }
 
