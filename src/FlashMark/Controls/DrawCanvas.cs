@@ -15,6 +15,7 @@ public class DrawCanvas : Control
     private Stroke? _currentStroke;
     private readonly FadeEngine _fadeEngine;
     private readonly Dictionary<ToolType, ITool> _tools;
+    private readonly PieMenu _pieMenu;
 
     public AppState State { get; }
 
@@ -40,6 +41,12 @@ public class DrawCanvas : Control
             [ToolType.Ellipse] = shapeTool,
             [ToolType.Eraser] = eraserTool,
         };
+
+        _pieMenu = new PieMenu
+        {
+            OnToolSelected = tool => State.CurrentTool = tool,
+            OnColorSelected = color => State.CurrentColor = color,
+        };
     }
 
     protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
@@ -58,7 +65,18 @@ public class DrawCanvas : Control
     {
         base.OnPointerPressed(e);
         var point = e.GetCurrentPoint(this);
-        if (!point.Properties.IsLeftButtonPressed) return;
+
+        if (point.Properties.IsRightButtonPressed)
+        {
+            _pieMenu.Center = point.Position;
+            _pieMenu.IsOpen = true;
+            _pieMenu.UpdateMousePosition(point.Position);
+            InvalidateVisual();
+            e.Handled = true;
+            return;
+        }
+
+        if (!point.Properties.IsLeftButtonPressed || _pieMenu.IsOpen) return;
 
         _currentStroke = new Stroke
         {
@@ -77,6 +95,15 @@ public class DrawCanvas : Control
     protected override void OnPointerMoved(PointerEventArgs e)
     {
         base.OnPointerMoved(e);
+
+        if (_pieMenu.IsOpen)
+        {
+            _pieMenu.UpdateMousePosition(e.GetCurrentPoint(this).Position);
+            InvalidateVisual();
+            e.Handled = true;
+            return;
+        }
+
         if (_currentStroke == null) return;
 
         _tools[_currentStroke.Tool].OnPointerMoved(e.GetCurrentPoint(this).Position, _currentStroke);
@@ -87,6 +114,17 @@ public class DrawCanvas : Control
     protected override void OnPointerReleased(PointerReleasedEventArgs e)
     {
         base.OnPointerReleased(e);
+
+        if (_pieMenu.IsOpen && e.InitialPressMouseButton == MouseButton.Right)
+        {
+            _pieMenu.UpdateMousePosition(e.GetCurrentPoint(this).Position);
+            _pieMenu.ConfirmSelection();
+            _pieMenu.IsOpen = false;
+            InvalidateVisual();
+            e.Handled = true;
+            return;
+        }
+
         if (_currentStroke == null) return;
 
         _tools[_currentStroke.Tool].OnPointerReleased(e.GetCurrentPoint(this).Position, _currentStroke);
@@ -157,5 +195,7 @@ public class DrawCanvas : Control
             if (stroke.Points.Count < 2) continue;
             _tools[stroke.Tool].Render(context, stroke);
         }
+
+        _pieMenu.Render(context);
     }
 }
