@@ -5,18 +5,33 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Media;
 using FlashMark.Models;
+using FlashMark.Services;
 
 public class DrawCanvas : Control
 {
     private Stroke? _currentStroke;
+    private readonly FadeEngine _fadeEngine;
 
     public AppState State { get; }
 
     public DrawCanvas()
     {
         State = new AppState { IsActive = true };
+        _fadeEngine = new FadeEngine(State, InvalidateVisual);
         ClipToBounds = true;
         Focusable = true;
+    }
+
+    protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
+    {
+        base.OnAttachedToVisualTree(e);
+        _fadeEngine.Start();
+    }
+
+    protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
+    {
+        base.OnDetachedFromVisualTree(e);
+        _fadeEngine.Stop();
     }
 
     protected override void OnPointerPressed(PointerPressedEventArgs e)
