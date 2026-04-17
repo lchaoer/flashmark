@@ -1,16 +1,19 @@
 namespace FlashMark.Controls;
 
+using System.Collections.Generic;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Media;
 using FlashMark.Models;
 using FlashMark.Services;
+using FlashMark.Tools;
 
 public class DrawCanvas : Control
 {
     private Stroke? _currentStroke;
     private readonly FadeEngine _fadeEngine;
+    private readonly Dictionary<ToolType, ITool> _tools;
 
     public AppState State { get; }
 
@@ -20,6 +23,19 @@ public class DrawCanvas : Control
         _fadeEngine = new FadeEngine(State, InvalidateVisual);
         ClipToBounds = true;
         Focusable = true;
+
+        var penTool = new PenTool();
+        var arrowTool = new ArrowTool();
+        var shapeTool = new ShapeTool();
+
+        _tools = new Dictionary<ToolType, ITool>
+        {
+            [ToolType.Pen] = penTool,
+            [ToolType.Arrow] = arrowTool,
+            [ToolType.Line] = arrowTool,
+            [ToolType.Rect] = shapeTool,
+            [ToolType.Ellipse] = shapeTool,
+        };
     }
 
     protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
@@ -47,7 +63,7 @@ public class DrawCanvas : Control
             Width = State.CurrentWidth,
             FadeMode = State.FadeMode,
         };
-        _currentStroke.Points.Add(point.Position);
+        _tools[_currentStroke.Tool].OnPointerPressed(point.Position, _currentStroke);
         State.Strokes.Add(_currentStroke);
         e.Handled = true;
     }
@@ -57,7 +73,7 @@ public class DrawCanvas : Control
         base.OnPointerMoved(e);
         if (_currentStroke == null) return;
 
-        _currentStroke.Points.Add(e.GetCurrentPoint(this).Position);
+        _tools[_currentStroke.Tool].OnPointerMoved(e.GetCurrentPoint(this).Position, _currentStroke);
         InvalidateVisual();
         e.Handled = true;
     }
@@ -67,6 +83,7 @@ public class DrawCanvas : Control
         base.OnPointerReleased(e);
         if (_currentStroke == null) return;
 
+        _tools[_currentStroke.Tool].OnPointerReleased(e.GetCurrentPoint(this).Position, _currentStroke);
         _currentStroke.IsComplete = true;
         _currentStroke = null;
         e.Handled = true;
@@ -79,17 +96,7 @@ public class DrawCanvas : Control
         foreach (var stroke in State.Strokes)
         {
             if (stroke.Points.Count < 2) continue;
-
-            var brush = new SolidColorBrush(stroke.Color, stroke.Opacity);
-            var pen = new Pen(brush, stroke.Width,
-                dashStyle: null,
-                lineCap: PenLineCap.Round,
-                lineJoin: PenLineJoin.Round);
-
-            for (int i = 1; i < stroke.Points.Count; i++)
-            {
-                context.DrawLine(pen, stroke.Points[i - 1], stroke.Points[i]);
-            }
+            _tools[stroke.Tool].Render(context, stroke);
         }
     }
 }
