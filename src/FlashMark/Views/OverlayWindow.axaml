@@ -9,7 +9,7 @@
         Topmost="True"
         WindowState="Maximized"
         ShowInTaskbar="False">
-    <Panel>
+    <Panel x:Name="RootPanel" Background="#01000000">
         <controls:DrawCanvas x:Name="Canvas" />
         <controls:BorderGlow x:Name="BorderGlow" />
         <controls:StatusBar x:Name="StatusBar" />

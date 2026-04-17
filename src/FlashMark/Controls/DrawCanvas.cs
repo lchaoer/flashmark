@@ -22,7 +22,7 @@ public class DrawCanvas : Control
 
     public DrawCanvas()
     {
-        State = new AppState { IsActive = true };
+        State = new AppState { IsActive = false };
         _fadeEngine = new FadeEngine(State, InvalidateVisual);
         ClipToBounds = true;
         Focusable = true;
@@ -140,15 +140,6 @@ public class DrawCanvas : Control
     {
         base.OnKeyDown(e);
 
-        if (e.Key == Key.Escape)
-        {
-            // Deactivate via the parent OverlayWindow
-            if (this.VisualRoot is Views.OverlayWindow overlay)
-                overlay.SetActive(false);
-            e.Handled = true;
-            return;
-        }
-
         if (!State.IsActive) return;
 
         if (e.Key == Key.Z && e.KeyModifiers.HasFlag(KeyModifiers.Control) && e.KeyModifiers.HasFlag(KeyModifiers.Shift))
@@ -202,6 +193,8 @@ public class DrawCanvas : Control
     public override void Render(DrawingContext context)
     {
         base.Render(context);
+
+        context.DrawRectangle(new SolidColorBrush(Color.FromArgb(1, 0, 0, 0)), null, new Rect(Bounds.Size));
 
         foreach (var stroke in State.Strokes)
         {

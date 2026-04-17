@@ -10,8 +10,8 @@ public class AppState : INotifyPropertyChanged
 {
     private bool _isActive;
     private ToolType _currentTool = ToolType.Pen;
-    private Color _currentColor = Colors.Red;
-    private double _currentWidth = 3.0;
+    private Color _currentColor = Color.Parse("#FFBB33");
+    private double _currentWidth = 5.0;
     private FadeMode _fadeMode = FadeMode.Fading;
 
     public bool IsActive

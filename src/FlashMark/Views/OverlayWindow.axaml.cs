@@ -22,6 +22,7 @@ public partial class OverlayWindow : Window
         {
             _windowHandle = handle.Handle;
             _platformHelper = new WindowsHelper();
+            _platformHelper.HideFromAltTab(_windowHandle);
             _platformHelper.RegisterHotkey(
                 _windowHandle, 1,
                 WindowsHelper.MOD_CONTROL | WindowsHelper.MOD_SHIFT,
@@ -30,8 +31,7 @@ public partial class OverlayWindow : Window
             );
         }
 
-        // Start in active mode
-        SetActive(true);
+        SetActive(false);
 
         // Listen for state changes to keep UI in sync
         Canvas.State.PropertyChanged += (_, args) =>
@@ -41,9 +41,16 @@ public partial class OverlayWindow : Window
         };
     }
 
-    private void ToggleActive()
+    public void ToggleActive()
     {
-        SetActive(!Canvas.State.IsActive);
+        try
+        {
+            SetActive(!Canvas.State.IsActive);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"ToggleActive error: {ex}");
+        }
     }
 
     public void SetActive(bool active)
@@ -53,10 +60,23 @@ public partial class OverlayWindow : Window
         StatusBar.IsBarVisible = active;
         StatusBar.Update(Canvas.State.CurrentTool, Canvas.State.FadeMode);
 
-        _platformHelper?.SetClickThrough(_windowHandle, !active);
-
         if (active)
+        {
+            WindowState = Avalonia.Controls.WindowState.Maximized;
+            Topmost = true;
+            _platformHelper?.HideFromAltTab(_windowHandle);
+            Activate();
             Canvas.Focus();
+        }
+        else
+        {
+            Topmost = false;
+            WindowState = Avalonia.Controls.WindowState.Normal;
+            Position = new Avalonia.PixelPoint(-10000, -10000);
+            Width = 1;
+            Height = 1;
+            _platformHelper?.HideFromAltTab(_windowHandle);
+        }
     }
 
     protected override void OnClosed(EventArgs e)

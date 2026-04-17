@@ -9,6 +9,7 @@ public class WindowsHelper : IPlatformHelper, IDisposable
 {
     private const int GWL_EXSTYLE = -20;
     private const int WS_EX_TRANSPARENT = 0x00000020;
+    private const int WS_EX_TOOLWINDOW = 0x00000080;
     private const int WH_KEYBOARD_LL = 13;
     private const int WM_KEYDOWN = 0x0100;
 
@@ -86,6 +87,14 @@ public class WindowsHelper : IPlatformHelper, IDisposable
             style |= WS_EX_TRANSPARENT;
         else
             style &= ~WS_EX_TRANSPARENT;
+        SetWindowLong(windowHandle, GWL_EXSTYLE, style);
+    }
+
+    public void HideFromAltTab(IntPtr windowHandle)
+    {
+        if (windowHandle == IntPtr.Zero) return;
+        var style = GetWindowLong(windowHandle, GWL_EXSTYLE);
+        style |= WS_EX_TOOLWINDOW;
         SetWindowLong(windowHandle, GWL_EXSTYLE, style);
     }
 
