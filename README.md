@@ -15,6 +15,8 @@ A lightweight screen annotation tool with auto-fading strokes. Built for remote 
 
 That's it. No setup, no config, no dependencies.
 
+> **Windows SmartScreen warning:** Since the exe is not code-signed, Windows may show a "protected your PC" warning. Click "More info" → "Run anyway" to proceed.
+
 ## Use Cases
 
 | Scenario | How FlashMark helps |
