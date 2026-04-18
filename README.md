@@ -1,11 +1,20 @@
-# FlashMark
+<p align="center">
+  <img src="assets/icon.png" alt="FlashMark" width="80" />
+</p>
 
-**Draw. Fade. Focus.**
+<h1 align="center">FlashMark</h1>
 
-A lightweight screen annotation tool with auto-fading strokes. Built for remote meetings, teaching, and screen sharing.
+<p align="center">
+  <strong>Draw. Fade. Focus.</strong><br/>
+  A lightweight screen annotation tool with auto-fading strokes.<br/>
+  Built for remote meetings, teaching, and screen sharing.
+</p>
 
-<!-- TODO: Add a GIF demo here -->
-<!-- ![FlashMark Demo](assets/demo.gif) -->
+<p align="center">
+  <img src="assets/demo.gif" alt="FlashMark Demo" width="720" />
+</p>
+
+---
 
 ## Quick Start
 
